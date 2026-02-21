@@ -82,91 +82,98 @@ export default function LandingPage() {
 
   const pricingPlans = [
     {
-      name: "Basic",
-      monthlyPrice: "$199",
-      yearlyPrice: "$1999",
+      name: "Starter",
+      monthlyPrice: "$99",
+      yearlyPrice: "$999",
       period: "per month",
       periodYearly: "per year",
-      description: "Perfect for single-location dispensaries",
+      description: "Perfect for small dispensaries and single shops",
       features: [
         "POS System",
         "Inventory Management",
         "Basic Reporting",
         "Mobile App",
-        "Email Support"
+        "Email Support",
+        "Up to 2 Users",
+        "1 Store Location"
+      ],
+      highlighted: false
+    },
+    {
+      name: "Basic",
+      monthlyPrice: "$199",
+      yearlyPrice: "$1,999",
+      period: "per month",
+      periodYearly: "per year",
+      description: "Perfect for growing businesses",
+      features: [
+        "Everything in Starter",
+        "Advanced POS Features",
+        "Inventory Analytics",
+        "Customer Management",
+        "Priority Email Support",
+        "Up to 5 Users",
+        "2 Store Locations"
       ],
       highlighted: false
     },
     {
       name: "Growth",
       monthlyPrice: "$299",
-      yearlyPrice: "$2999",
+      yearlyPrice: "$2,999",
       period: "per month",
       periodYearly: "per year",
-      description: "Ideal for growing dispensaries with multiple locations",
+      description: "Ideal for multi-location dispensaries",
       features: [
         "Everything in Basic",
         "Multi-Store Support",
         "Advanced Reporting",
         "Delivery Management",
         "QR Authentication",
-        "Priority Support"
+        "Priority Support",
+        "Up to 15 Users",
+        "Up to 10 Store Locations"
       ],
       highlighted: true
     },
     {
       name: "Consultant",
       monthlyPrice: "$399",
-      yearlyPrice: "$3999",
+      yearlyPrice: "$3,999",
       period: "per month",
       periodYearly: "per year",
-      description: "Complete solution for cannabis compliance consultants",
+      description: "Complete solution for agencies and consultants",
       features: [
         "Everything in Growth",
         "Multi-Client Management",
         "White-Label Branding",
         "Client Onboarding",
         "Revenue Tracking",
-        "Dedicated Support"
+        "Dedicated Account Manager",
+        "Unlimited Users",
+        "Unlimited Clients"
       ],
       highlighted: false
     },
     {
       name: "Enterprise",
       monthlyPrice: "$499",
-      yearlyPrice: "$4999",
+      yearlyPrice: "$4,999",
       period: "per month",
       periodYearly: "per year",
-      description: "Comprehensive solution for large dispensary chains",
+      description: "Comprehensive solution for chains and large organizations",
       features: [
         "Everything in Consultant",
         "Unlimited Locations",
         "Custom Integrations",
         "Advanced Analytics",
-        "API Access",
-        "White-Glove Support"
+        "Full API Access",
+        "White-Glove Support",
+        "Custom Training",
+        "SLA Guarantee",
+        "24/7 Phone Support"
       ],
       highlighted: false
-    },
-    {
-      name: "Ultimate",
-      monthlyPrice: "$999",
-      yearlyPrice: "$9999",
-      period: "per month",
-      periodYearly: "per year",
-      description: "All-inclusive premium package for enterprise-level operations",
-      features: [
-        "Everything in Enterprise",
-        "Unlimited Everything",
-        "Dedicated Infrastructure",
-        "24/7 Premium Support",
-        "Custom Feature Development",
-        "On-site Training",
-        "Compliance Consulting",
-        "Priority Roadmap Access",
-        "Zero Downtime Guarantee"
-      ],
-      highlighted: true
     }
   ]
 
