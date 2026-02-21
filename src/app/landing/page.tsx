@@ -179,8 +179,74 @@ export default function LandingPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle signup logic here
-    console.log('Signup clicked')
+    
+    try {
+      const formData = new FormData(e.currentTarget as HTMLFormElement)
+      const businessName = formData.get('business-name') as string
+      const email = formData.get('email') as string
+      const phone = formData.get('phone') as string
+      const businessType = formData.get('business-type') as string
+      const plan = formData.get('plan') as string
+      const billingCycle = formData.get('billing-cycle') as string
+
+      // Register user
+      const registerResponse = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          businessName,
+          email,
+          phone,
+          businessType,
+          password: Math.random().toString(36), // Temporary password, user will set it later
+          name: businessName,
+        }),
+      })
+
+      if (!registerResponse.ok) {
+        const error = await registerResponse.json()
+        alert(`Registration failed: ${error.error}`)
+        return
+      }
+
+      const { user } = await registerResponse.json()
+
+      // Create subscription order
+      const orderResponse = await fetch('/api/payments/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          planId: plan || 'starter',
+          billingCycle: billingCycle || 'monthly',
+          amount: SUBSCRIPTION_PLANS[plan || 'starter'].price,
+          customerDetails: {
+            customer_id: user.id,
+            customer_name: businessName,
+            customer_email: email,
+            customer_phone: phone,
+          },
+        }),
+      })
+
+      if (!orderResponse.ok) {
+        const error = await orderResponse.json()
+        alert(`Payment failed: ${error.error}`)
+        return
+      }
+
+      const { paymentLink } = await orderResponse.json()
+      
+      // Redirect to payment page
+      window.location.href = paymentLink
+
+    } catch (error) {
+      console.error('Signup error:', error)
+      alert('Registration failed. Please try again.')
+    }
   }
 
   const handleLogin = async (e: React.FormEvent) => {

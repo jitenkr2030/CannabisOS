@@ -6,7 +6,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
 }
 
 // User management with roles
@@ -889,4 +889,136 @@ enum TicketStatus {
   RESOLVED
   CLOSED
   CANCELLED
+}
+
+// Subscription Management System
+model Subscription {
+  id                String           @id @default(cuid())
+  userId            String
+  planId            String
+  planName          String
+  billingCycle      BillingCycle   @default(MONTHLY)
+  amount            Float
+  currency          String           @default("USD")
+  status            SubscriptionStatus @default(PENDING)
+  subscriptionId    String?
+  paymentSessionId  String?
+  customerDetails   Json?            // Cashfree customer details
+  features          Json?            // Plan features
+  maxUsers          Int              @default(1)
+  maxStores         Int              @default(1)
+  maxClients        Int              @default(0)
+  customIntegrations Boolean         @default(false)
+  apiAccess         Boolean          @default(false)
+  whiteLabel        Boolean          @default(false)
+  dedicatedSupport  Boolean          @default(false)
+  customTraining    Boolean          @default(false)
+  startDate         DateTime         @default(now())
+  endDate           DateTime?
+  nextBillingDate    DateTime?
+  cancelledAt       DateTime?
+  cancellationReason String?
+  activatedAt       DateTime?
+  autoRenew         Boolean          @default(true)
+  paymentMethod     String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // Relationships
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoices          Invoice[]
+  usageLogs         UsageLog[]
+
+  @@map("subscriptions")
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  FAILED
+  SUSPENDED
+}
+
+// Usage Tracking for Enforcement
+model UsageLog {
+  id                String   @id @default(cuid())
+  userId            String
+  subscriptionId    String
+  metricType        UsageMetric
+  currentValue     Int
+  limitValue       Int
+  exceeded          Boolean  @default(false)
+  description       String?
+  metadata          Json?
+  createdAt         DateTime @default(now())
+
+  // Relationships
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription      Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("usage_logs")
+}
+
+enum UsageMetric {
+  USERS
+  STORES
+  CLIENTS
+  API_CALLS
+  STORAGE
+  BANDWIDTH
+  TRANSACTIONS
+  INTEGRATIONS
+}
+
+// Payment and Transaction Records
+model Transaction {
+  id                String           @id @default(cuid())
+  userId            String
+  subscriptionId    String?
+  paymentMethod     String
+  paymentProvider   String           @default("CASHFREE")
+  transactionId     String           @unique
+  orderId           String?
+  amount            Float
+  currency          String           @default("USD")
+  status            TransactionStatus @default(PENDING)
+  type              TransactionType  @default(PAYMENT)
+  description       String?
+  metadata          Json?
+  failureReason     String?
+  processedAt       DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // Relationships
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription      Subscription?    @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum TransactionType {
+  PAYMENT
+  REFUND
+  CHARGEBACK
+  SUBSCRIPTION_PAYMENT
+  PLAN_UPGRADE
+  PLAN_DOWNGRADE
+  ADD_ON
 }
