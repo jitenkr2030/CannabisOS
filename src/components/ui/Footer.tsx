@@ -266,10 +266,6 @@ export default function Footer() {
               <Leaf className="h-10 w-10 text-green-400" />
               <span className="text-2xl font-bold text-white">CannabisOS</span>
             </div>
-            <p className="text-gray-300 mb-6 max-w-md">
-              The complete dispensary management system for modern cannabis businesses. 
-              Streamline operations, ensure compliance, and grow your business with our all-in-one platform.
-            </p>
             
             {/* Contact Info */}
             <div className="space-y-3 mb-6">
