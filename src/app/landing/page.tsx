@@ -147,6 +147,26 @@ export default function LandingPage() {
         "White-Glove Support"
       ],
       highlighted: false
+    },
+    {
+      name: "Ultimate",
+      monthlyPrice: "$999",
+      yearlyPrice: "$9999",
+      period: "per month",
+      periodYearly: "per year",
+      description: "All-inclusive premium package for enterprise-level operations",
+      features: [
+        "Everything in Enterprise",
+        "Unlimited Everything",
+        "Dedicated Infrastructure",
+        "24/7 Premium Support",
+        "Custom Feature Development",
+        "On-site Training",
+        "Compliance Consulting",
+        "Priority Roadmap Access",
+        "Zero Downtime Guarantee"
+      ],
+      highlighted: true
     }
   ]
 
@@ -527,7 +547,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
             {pricingPlans.map((plan, index) => (
               <Card key={index} className={`relative ${plan.highlighted ? 'ring-2 ring-green-500' : 'hover:shadow-lg transition-shadow'}`}>
                 {plan.highlighted && (

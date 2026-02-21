@@ -93,6 +93,28 @@ export default function PricingPage() {
       highlighted: false,
       icon: <Building className="h-6 w-6" />,
       color: "text-orange-600"
+    },
+    {
+      name: "Ultimate",
+      monthlyPrice: "$999",
+      yearlyPrice: "$9,999",
+      period: "per month",
+      periodYearly: "per year",
+      description: "All-inclusive premium package for enterprise-level operations",
+      features: [
+        "Everything in Enterprise",
+        "Unlimited Everything",
+        "Dedicated Infrastructure",
+        "24/7 Premium Support",
+        "Custom Feature Development",
+        "On-site Training",
+        "Compliance Consulting",
+        "Priority Roadmap Access",
+        "Zero Downtime Guarantee"
+      ],
+      highlighted: true,
+      icon: <Crown className="h-6 w-6" />,
+      color: "text-red-600"
     }
   ]
 
@@ -192,7 +214,7 @@ export default function PricingPage() {
       {/* Pricing Cards */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
             {pricingPlans.map((plan, index) => (
               <Card key={index} className={`relative ${plan.highlighted ? 'ring-2 ring-green-500 scale-105' : 'hover:shadow-lg transition-shadow'} border-0 shadow-sm`}>
                 {plan.highlighted && (
@@ -265,11 +287,13 @@ export default function PricingPage() {
                   <th className="text-center p-4 font-semibold text-gray-900">Growth</th>
                   <th className="text-center p-4 font-semibold text-gray-900">Consultant</th>
                   <th className="text-center p-4 font-semibold text-gray-900">Enterprise</th>
+                  <th className="text-center p-4 font-semibold text-gray-900">Ultimate</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b">
                   <td className="p-4 font-medium">Point of Sale</td>
+                  <td className="p-4 text-center">✓</td>
                   <td className="p-4 text-center">✓</td>
                   <td className="p-4 text-center">✓</td>
                   <td className="p-4 text-center">✓</td>
@@ -281,10 +305,12 @@ export default function PricingPage() {
                   <td className="p-4 text-center">✓</td>
                   <td className="p-4 text-center">✓</td>
                   <td className="p-4 text-center">✓</td>
+                  <td className="p-4 text-center">✓</td>
                 </tr>
                 <tr className="border-b">
                   <td className="p-4 font-medium">Multi-Store Support</td>
                   <td className="p-4 text-center">-</td>
+                  <td className="p-4 text-center">✓</td>
                   <td className="p-4 text-center">✓</td>
                   <td className="p-4 text-center">✓</td>
                   <td className="p-4 text-center">✓</td>
@@ -295,6 +321,7 @@ export default function PricingPage() {
                   <td className="p-4 text-center">-</td>
                   <td className="p-4 text-center">✓</td>
                   <td className="p-4 text-center">✓</td>
+                  <td className="p-4 text-center">✓</td>
                 </tr>
                 <tr className="border-b">
                   <td className="p-4 font-medium">Custom Integrations</td>
@@ -302,9 +329,27 @@ export default function PricingPage() {
                   <td className="p-4 text-center">-</td>
                   <td className="p-4 text-center">-</td>
                   <td className="p-4 text-center">✓</td>
+                  <td className="p-4 text-center">✓</td>
                 </tr>
                 <tr className="border-b bg-gray-50">
                   <td className="p-4 font-medium">API Access</td>
+                  <td className="p-4 text-center">-</td>
+                  <td className="p-4 text-center">-</td>
+                  <td className="p-4 text-center">-</td>
+                  <td className="p-4 text-center">✓</td>
+                  <td className="p-4 text-center">✓</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="p-4 font-medium">Dedicated Infrastructure</td>
+                  <td className="p-4 text-center">-</td>
+                  <td className="p-4 text-center">-</td>
+                  <td className="p-4 text-center">-</td>
+                  <td className="p-4 text-center">-</td>
+                  <td className="p-4 text-center">✓</td>
+                </tr>
+                <tr className="border-b bg-gray-50">
+                  <td className="p-4 font-medium">24/7 Premium Support</td>
+                  <td className="p-4 text-center">-</td>
                   <td className="p-4 text-center">-</td>
                   <td className="p-4 text-center">-</td>
                   <td className="p-4 text-center">-</td>
