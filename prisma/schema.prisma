@@ -1,0 +1,892 @@
+// CannabisOS - Comprehensive Dispensary Management System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User management with roles
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  password      String
+  role          UserRole @default(STAFF)
+  phone         String?
+  avatar        String?
+  isActive      Boolean  @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relationships
+  store         Store?   @relation(fields: [storeId], references: [id])
+  storeId       String?
+  consultantId  String?
+  clientId      String?
+  partnerId     String?
+  sales         Sale[]
+  expenses      Expense[]
+  deliveries    Delivery[]
+  auditLogs     AuditLog[]
+  stockMovements StockMovement[]
+  consultant    Consultant? @relation("ConsultantUsers")
+  client        Client?  @relation("ClientUsers", fields: [clientId], references: [id])
+  partner       Partner?  @relation("PartnerUsers", fields: [partnerId], references: [id])
+  
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  STAFF
+  DRIVER
+  ACCOUNTANT
+  CONSULTANT
+  PARTNER
+}
+
+// Store management for multi-store support
+model Store {
+  id            String   @id @default(cuid())
+  name          String
+  address       String
+  phone         String?
+  email         String?
+  licenseNumber String?
+  isActive      Boolean  @default(true)
+  timezone      String   @default("America/Toronto")
+  currency      String   @default("CAD")
+  clientId      String?
+  consultantId  String?
+  storeId       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relationships
+  users         User[]
+  products      Product[]
+  inventory     Inventory[]
+  sales         Sale[]
+  expenses      Expense[]
+  deliveries    Delivery[]
+  batches       Batch[]
+  client        Client?   @relation(fields: [clientId], references: [id])
+  consultant    Consultant? @relation("ConsultantStores", fields: [consultantId], references: [id])
+  
+  @@map("stores")
+}
+
+// Product catalog with THC/CBD tracking
+model Product {
+  id              String         @id @default(cuid())
+  name            String
+  description     String?
+  sku             String         @unique
+  barcode         String?
+  category        ProductCategory
+  thcContent      Float?         // THC percentage
+  cbdContent      Float?         // CBD percentage
+  weight          Float?         // Weight in grams
+  unit            String         @default("g") // g, mg, ml, units
+  price           Float
+  cost            Float?
+  isActive        Boolean        @default(true)
+  requiresAge     Boolean        @default(true)
+  minAge          Int            @default(19)
+  imageUrl        String?
+  tags            String?        // JSON string for search and filtering
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  // Relationships
+  store           Store          @relation(fields: [storeId], references: [id])
+  storeId         String
+  inventory       Inventory[]
+  saleItems       SaleItem[]
+  batchProducts   BatchProduct[]
+  qrCodes         QRCode[]
+  
+  @@map("products")
+}
+
+enum ProductCategory {
+  FLOWER
+  EDIBLES
+  CONCENTRATES
+  VAPES
+  TOPICALS
+  TINCTURES
+  ACCESSORIES
+  PRE_ROLLS
+}
+
+// Inventory management with batch tracking
+model Inventory {
+  id            String   @id @default(cuid())
+  quantity      Float    @default(0)
+  reserved      Float    @default(0) // Reserved for orders
+  available     Float    // Computed: quantity - reserved
+  reorderLevel  Float    @default(0)
+  maxStock      Float?
+  location      String?  // Storage location
+  lastCounted   DateTime?
+  storeId       String?
+  consultantId  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relationships
+  product       Product  @relation(fields: [productId], references: [id])
+  productId     String
+  batch         Batch?   @relation(fields: [batchId], references: [id])
+  batchId       String?
+  movements     StockMovement[]
+  store         Store?    @relation(fields: [storeId], references: [id])
+  
+  @@map("inventory")
+}
+
+// Batch tracking for compliance
+model Batch {
+  id            String   @id @default(cuid())
+  batchNumber   String   @unique
+  supplier      String
+  supplierLicense String?
+  receivedDate  DateTime
+  expiryDate    DateTime?
+  testDate      DateTime?
+  labResults    Json?    // Lab test results
+  coaUrl        String?  // Certificate of Analysis
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relationships
+  store         Store    @relation(fields: [storeId], references: [id])
+  storeId       String
+  products      BatchProduct[]
+  inventory     Inventory[]
+  
+  @@map("batches")
+}
+
+model BatchProduct {
+  id            String   @id @default(cuid())
+  quantity      Float
+  createdAt     DateTime @default(now())
+  
+  // Relationships
+  batch         Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  batchId       String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId     String
+  
+  @@unique([batchId, productId])
+  @@map("batch_products")
+}
+
+// Stock movement tracking
+model StockMovement {
+  id            String           @id @default(cuid())
+  type          MovementType
+  quantity      Float
+  reason        String?
+  reference     String?          // Sale ID, Transfer ID, etc.
+  createdAt     DateTime         @default(now())
+  
+  // Relationships
+  inventory     Inventory        @relation(fields: [inventoryId], references: [id])
+  inventoryId   String
+  user          User             @relation(fields: [userId], references: [id])
+  userId        String
+  
+  @@map("stock_movements")
+}
+
+enum MovementType {
+  SALE
+  PURCHASE
+  TRANSFER_IN
+  TRANSFER_OUT
+  ADJUSTMENT
+  DAMAGE
+  RETURN
+  EXPIRED
+}
+
+// POS and Sales
+model Sale {
+  id            String       @id @default(cuid())
+  receiptNumber String       @unique
+  customerName  String?
+  customerPhone String?
+  customerEmail String?
+  subtotal      Float
+  tax           Float        @default(0)
+  discount      Float        @default(0)
+  total         Float
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PAID)
+  status        SaleStatus   @default(COMPLETED)
+  notes         String?
+  ageVerified   Boolean      @default(false)
+  verifiedBy    String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  // Relationships
+  store         Store        @relation(fields: [storeId], references: [id])
+  storeId       String
+  user          User         @relation(fields: [userId], references: [id])
+  userId        String
+  items         SaleItem[]
+  payments      Payment[]
+  
+  @@map("sales")
+}
+
+model SaleItem {
+  id            String   @id @default(cuid())
+  quantity      Float
+  unitPrice     Float
+  discount      Float    @default(0)
+  total         Float
+  createdAt     DateTime @default(now())
+  
+  // Relationships
+  sale          Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  saleId        String
+  product       Product  @relation(fields: [productId], references: [id])
+  productId     String
+  
+  @@map("sale_items")
+}
+
+enum PaymentMethod {
+  CASH
+  DEBIT
+  CREDIT
+  ETRANSFER
+  CRYPTO
+  STORE_CREDIT
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum SaleStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  amount        Float
+  method        PaymentMethod
+  status        PaymentStatus @default(PAID)
+  transactionId String?
+  invoiceId     String?
+  createdAt     DateTime      @default(now())
+  
+  // Relationships
+  sale          Sale?          @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  saleId        String?
+  partnerId     String?
+  partner       Partner?       @relation("PartnerPayments", fields: [partnerId], references: [id])
+  
+  @@map("payments")
+}
+
+// AI Accounting System
+model Expense {
+  id            String       @id @default(cuid())
+  description   String
+  amount        Float
+  category      ExpenseCategory
+  date          DateTime
+  receiptUrl    String?
+  isRecurring   Boolean      @default(false)
+  recurringInterval String?  // daily, weekly, monthly, yearly
+  nextDueDate   DateTime?
+  notes         String?
+  voiceNote     String?      // Transcribed voice input
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  // Relationships
+  store         Store        @relation(fields: [storeId], references: [id])
+  storeId       String
+  user          User         @relation(fields: [userId], references: [id])
+  userId        String
+  
+  @@map("expenses")
+}
+
+enum ExpenseCategory {
+  RENT
+  UTILITIES
+  SALARY
+  MARKETING
+  SUPPLIES
+  INVENTORY
+  EQUIPMENT
+  INSURANCE
+  LEGAL
+  MAINTENANCE
+  TRANSPORT
+  TAXES
+  OTHER
+}
+
+// QR Code Authentication
+model QRCode {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  product       Product  @relation(fields: [productId], references: [id])
+  productId     String
+  batchId       String?
+  isActive      Boolean  @default(true)
+  scanCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("qr_codes")
+}
+
+// Delivery Management
+model Delivery {
+  id            String           @id @default(cuid())
+  orderNumber   String           @unique
+  customerName  String
+  customerPhone String
+  customerAddress String
+  customerEmail String?
+  notes         String?
+  status        DeliveryStatus   @default(PENDING)
+  estimatedTime DateTime?
+  actualTime    DateTime?
+  distance      Float?           // in km
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  
+  // Relationships
+  store         Store            @relation(fields: [storeId], references: [id])
+  storeId       String
+  driver        User?            @relation(fields: [driverId], references: [id])
+  driverId      String?
+  items         DeliveryItem[]
+  tracking      DeliveryTracking[]
+  
+  @@map("deliveries")
+}
+
+model DeliveryItem {
+  id            String   @id @default(cuid())
+  quantity      Float
+  notes         String?
+  createdAt     DateTime @default(now())
+  
+  // Relationships
+  delivery      Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  deliveryId    String
+  productName   String
+  thcContent    Float?
+  cbdContent    Float?
+  
+  @@map("delivery_items")
+}
+
+enum DeliveryStatus {
+  PENDING
+  ASSIGNED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  FAILED
+}
+
+model DeliveryTracking {
+  id            String   @id @default(cuid())
+  status        DeliveryStatus
+  location      String?
+  notes         String?
+  timestamp     DateTime @default(now())
+  
+  // Relationships
+  delivery      Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  deliveryId    String
+  
+  @@map("delivery_tracking")
+}
+
+// Compliance and Audit
+model ComplianceReport {
+  id            String           @id @default(cuid())
+  type          ReportType
+  period        String           // e.g., "2024-01", "Q1-2024"
+  data          Json             // Report data
+  status        ReportStatus     @default(PENDING)
+  submittedAt   DateTime?
+  submittedBy   String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  
+  @@map("compliance_reports")
+}
+
+enum ReportType {
+  DAILY_SALES
+  MONTHLY_INVENTORY
+  QUARTERLY_TAX
+  ANNUAL_COMPLIANCE
+  LAB_RESULTS
+  BATCH_TRACKING
+}
+
+enum ReportStatus {
+  PENDING
+  GENERATED
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+model AuditLog {
+  id            String       @id @default(cuid())
+  action        String
+  entity        String       // table name
+  entityId      String
+  oldValues     Json?
+  newValues     Json?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime     @default(now())
+  
+  // Relationships
+  user          User         @relation(fields: [userId], references: [id])
+  userId        String
+  
+  @@map("audit_logs")
+}
+
+// Settings and Configuration
+model Setting {
+  id            String   @id @default(cuid())
+  key           String   @unique
+  value         String
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("settings")
+}
+
+// Consultant Management System
+model Consultant {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  businessName  String
+  contactEmail  String
+  phone         String?
+  website       String?
+  commissionRate Float    @default(25)
+  monthlyRevenue Float    @default(0)
+  totalRevenue  Float    @default(0)
+  status        ConsultantStatus @default(ACTIVE)
+  whiteLabelEnabled Boolean @default(false)
+  customDomain  String?
+  logoUrl       String?
+  primaryColor  String   @default("#16a34a")
+  secondaryColor String   @default("#22c55e")
+  consultantId  String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relationships
+  user          User     @relation("ConsultantUsers", fields: [userId], references: [id], onDelete: Cascade)
+  clients       Client[]
+  stores         Store[]   @relation("ConsultantStores")
+  invoices       Invoice[]
+  reports        ConsultantReport[]
+  branding      ConsultantBranding?
+  
+  @@map("consultants")
+}
+
+// Client Management for Consultants
+model Client {
+  id            String   @id @default(cuid())
+  consultantId  String
+  businessName  String
+  contactName   String
+  contactEmail  String
+  contactPhone  String
+  businessAddress String
+  city          String
+  province      String
+  postalCode    String
+  country       String   @default("Canada")
+  status        ClientStatus @default(ACTIVE)
+  plan          String   @default("Basic")
+  monthlyFee    Float    @default(199)
+  startDate     DateTime @default(now())
+  endDate       DateTime?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relationships
+  consultant    Consultant @relation(fields: [consultantId], references: [id], onDelete: Cascade)
+  users         User[]   @relation("ClientUsers")
+  stores         Store[]
+  invoices       Invoice[]
+  reports        ConsultantReport[]
+  
+  @@map("clients")
+}
+
+enum ConsultantStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  TERMINATED
+}
+
+// Consultant Branding
+model ConsultantBranding {
+  id            String   @id @default(cuid())
+  consultantId  String   @unique
+  logoUrl       String?
+  faviconUrl    String?
+  companyName   String?
+  customDomain  String?
+  primaryColor  String   @default("#16a34a")
+  secondaryColor String   @default("#22c55e")
+  accentColor   String   @default("#10b981")
+  backgroundColor String   @default("#ffffff")
+  textColor     String   @default("#1f2937")
+  isCustomBranding Boolean @default(false)
+  brandSettings Json?   // Additional branding settings
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relationships
+  consultant    Consultant @relation(fields: [consultantId], references: [id], onDelete: Cascade)
+  
+  @@map("consultant_branding")
+}
+
+// Consultant Invoices
+model Invoice {
+  id            String   @id @default(cuid())
+  invoiceNumber String   @unique
+  consultantId  String
+  clientId      String
+  amount        Float
+  tax           Float    @default(0)
+  total         Float
+  status        InvoiceStatus @default(DRAFT)
+  issueDate     DateTime @default(now())
+  dueDate       DateTime
+  paidDate      DateTime?
+  paymentMethod String?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relationships
+  consultant    Consultant @relation(fields: [consultantId], references: [id], onDelete: Cascade)
+  client        Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@map("invoices")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+// Consultant Reports
+model ConsultantReport {
+  id            String   @id @default(cuid())
+  consultantId  String
+  clientId      String?
+  reportType    ConsultantReportType
+  title         String
+  description   String?
+  data          Json     // Report data
+  status        ReportStatus @default(PENDING)
+  generatedAt   DateTime @default(now())
+  submittedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relationships
+  consultant    Consultant @relation(fields: [consultantId], references: [id], onDelete: Cascade)
+  client        Client?    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@map("consultant_reports")
+}
+
+enum ConsultantReportType {
+  MONTHLY_SUMMARY
+  COMPLIANCE_REPORT
+  INVENTORY_REPORT
+  SALES_REPORT
+  FINANCIAL_REPORT
+  CLIENT_PERFORMANCE
+}
+
+// Partner Program Management
+model Partner {
+  id            String   @id @default(cuid())
+  companyName   String
+  contactName   String
+  email         String   @unique
+  phone         String?
+  website       String?
+  status        PartnerStatus @default(PENDING)
+  commissionRate Float    @default(25)
+  monthlyRevenue Float    @default(0)
+  totalCommission Float    @default(0)
+  referralCode  String   @unique
+  referralCount Int      @default(0)
+  activeClients Int      @default(0)
+  whiteLabelEnabled Boolean  @default(false)
+  customDomain  String?
+  partnerSince  DateTime @default(now())
+  lastActivity  DateTime @default(now())
+  tier          PartnerTier @default(BRONZE)
+  onboardingStatus OnboardingStatus @default(NOT_STARTED)
+  notes         String?
+  
+  // Relationships
+  users         User[]   @relation("PartnerUsers")
+  referrals     Referral[]
+  commissions   Commission[]
+  onboardingTasks OnboardingTask[]
+  branding      PartnerBranding?
+  supportTickets SupportTicket[]
+  payments      Payment[]   @relation("PartnerPayments")
+  
+  @@map("partners")
+}
+
+// Partner Referrals
+model Referral {
+  id            String   @id @default(cuid())
+  partnerId     String
+  referredEmail String
+  referredCompany String?
+  status        ReferralStatus @default(PENDING)
+  conversionDate String?
+  commissionAmount Float @default(0)
+  plan          String?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relationships
+  partner       Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  
+  @@map("referrals")
+}
+
+enum PartnerStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  TERMINATED
+}
+
+enum PartnerTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum ReferralStatus {
+  PENDING
+  CONTACTED
+  CONVERTED
+  LOST
+  CANCELLED
+}
+
+// Partner Commissions
+model Commission {
+  id              String   @id @default(cuid())
+  partnerId       String
+  clientId        String?
+  referralId      String?
+  amount          Float
+  commissionRate  Float
+  commissionAmount Float
+  month           String
+  status          CommissionStatus @default(PENDING)
+  paidDate        String?
+  invoiceId       String?
+  paymentMethod   String?
+  transactionId   String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relationships
+  partner         Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  
+  @@map("commissions")
+}
+
+enum CommissionStatus {
+  PENDING
+  APPROVED
+  PAID
+  FAILED
+  CANCELLED
+}
+
+// Partner Onboarding Tasks
+model OnboardingTask {
+  id            String   @id @default(cuid())
+  partnerId     String
+  title         String
+  description   String?
+  status        TaskStatus @default(NOT_STARTED)
+  priority      Priority   @default(MEDIUM)
+  assignedTo    String?
+  dueDate       String
+  completedDate String?
+  category       TaskCategory @default(SETUP)
+  resources     String? // JSON string of resource URLs
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relationships
+  partner       Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  
+  @@map("onboarding_tasks")
+}
+
+enum TaskStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  BLOCKED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TaskCategory {
+  SETUP
+  TRAINING
+  CUSTOMIZATION
+  LAUNCH
+  MARKETING
+  TECHNICAL
+  BILLING
+  SUPPORT
+}
+
+enum OnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  NEEDS_ATTENTION
+  BLOCKED
+}
+
+// Partner White-Label Branding
+model PartnerBranding {
+  id            String   @id @default(cuid())
+  partnerId     String   @unique
+  logoUrl       String?
+  faviconUrl    String?
+  companyName   String?
+  customDomain  String?
+  primaryColor  String   @default("#16a34a")
+  secondaryColor String   @default("#22c55e")
+  accentColor   String   @default("#10b981")
+  backgroundColor String   @default("#ffffff")
+  textColor     String   @default("#1f2937")
+  isCustomBranding Boolean @default(false)
+  brandSettings Json?   // Additional branding settings
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relationships
+  partner       Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  
+  @@map("partner_branding")
+}
+
+// Support Tickets for Partners
+model SupportTicket {
+  id            String   @id @default(cuid())
+  partnerId     String?
+  clientId      String?
+  userId        String?
+  subject       String
+  description   String
+  priority      Priority   @default(MEDIUM)
+  status        TicketStatus @default(OPEN)
+  category      SupportCategory @default(GENERAL)
+  assignedTo    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  resolvedAt    DateTime?
+  resolution    String?
+  
+  // Relationships
+  partner       Partner?  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  
+  @@map("support_tickets")
+}
+
+enum SupportCategory {
+  GENERAL
+  TECHNICAL
+  BILLING
+  ACCOUNT
+  ONBOARDING
+  MARKETING
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_CUSTOMER
+  RESOLVED
+  CLOSED
+  CANCELLED
+}
