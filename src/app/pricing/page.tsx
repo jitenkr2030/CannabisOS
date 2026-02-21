@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle, Star, Globe, DollarSign, Leaf, TrendingUp, Package, Users, Building } from 'lucide-react'
 import Footer from '@/components/ui/Footer'
+import { useI18n } from '@/lib/i18n/provider'
+import { formatPrice } from '@/lib/i18n/utils'
+import { LanguageSelector } from '@/components/ui/LanguageSelector'
 
 const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
