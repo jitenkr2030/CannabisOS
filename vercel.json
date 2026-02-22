@@ -1,0 +1,23 @@
+{
+  "buildCommand": "prisma generate && next build",
+  "installCommand": "bun install",
+  "framework": "nextjs",
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "NEXTAUTH_URL": "https://cannabisos.vercel.app",
+    "NEXTAUTH_SECRET": "@nextauth_secret",
+    "DATABASE_URL": "@database_url",
+    "CASHFREE_CLIENT_ID": "@cashfree_client_id",
+    "CASHFREE_CLIENT_SECRET": "@cashfree_client_secret",
+    "CASHFREE_WEBHOOK_SECRET": "@cashfree_webhook_secret"
+  },
+  "build": {
+    "env": {
+      "PRISMA_GENERATE_DATAPROXY": "true"
+    }
+  }
+}
