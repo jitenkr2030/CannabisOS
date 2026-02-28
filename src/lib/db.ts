@@ -1,5 +1,5 @@
-// Use real database connection - no mock fallbacks
-export { db, isUsingMockDb, getRealDb, disconnect } from './db-real'
+// Simple database connection using Prisma 6.x
+export { db, isUsingMockDb, getRealDb, disconnect } from './db-simple'
 
 // Also export the types for convenience
 export type { PrismaClient } from '@prisma/client'
