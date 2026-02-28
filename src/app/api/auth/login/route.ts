@@ -29,17 +29,40 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Get database instance
+    const dbInstance = await db
+    
+    // Check if any users exist in database
+    const userCount = await dbInstance.user.count()
+    if (userCount === 0) {
+      return NextResponse.json(
+        { 
+          error: 'No users found in database',
+          message: 'Database needs to be seeded. Please contact administrator.',
+          needsSeeding: true
+        },
+        { status: 404 }
+      )
+    }
+
     // Find user with store
-    const user = await (await db).user.findUnique({
+    const user = await dbInstance.user.findUnique({
       where: { email },
       include: {
         store: true
       }
     })
 
-    if (!user || !user.isActive) {
+    if (!user) {
       return NextResponse.json(
-        { error: 'Invalid credentials' },
+        { error: 'User not found', message: 'No account found with this email address' },
+        { status: 401 }
+      )
+    }
+
+    if (!user.isActive) {
+      return NextResponse.json(
+        { error: 'Account inactive', message: 'Your account has been deactivated' },
         { status: 401 }
       )
     }
@@ -48,13 +71,13 @@ export async function POST(request: NextRequest) {
     const isPasswordValid = await bcrypt.compare(password, user.password)
     if (!isPasswordValid) {
       return NextResponse.json(
-        { error: 'Invalid credentials' },
+        { error: 'Invalid password', message: 'The password you entered is incorrect' },
         { status: 401 }
       )
     }
 
     // Update last login
-    await (await db).user.update({
+    await dbInstance.user.update({
       where: { id: user.id },
       data: { lastLoginAt: new Date() }
     })
