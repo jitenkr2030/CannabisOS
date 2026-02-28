@@ -1,0 +1,48 @@
+{
+  "version": 2,
+  "name": "cannabis-os",
+  "buildCommand": "NODE_OPTIONS='--max-old-space-size=4096' bun install && NODE_OPTIONS='--max-old-space-size=4096' next build --webpack",
+  "installCommand": "bun install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "build": {
+    "env": {
+      "NEXT_TELEMETRY_DISABLED": "1",
+      "NODE_OPTIONS": "--max-old-space-size=4096"
+    }
+  },
+  "env": {
+    "NEXTAUTH_URL": "https://cannabis-os.vercel.app",
+    "DATABASE_URL": "postgresql://neondb_owner:npg_Lyxz26cWFNUb@ep-little-dust-ains7d8e-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+    "NEXTAUTH_SECRET": "HzEAmVchztzO6rKRUjXhRxPnld5zDn3GVlLhzceEZUcV9D3g4IFdAaVOmFg=",
+    "JWT_SECRET": "cannabisos-jwt-secret-key-2024-production-grade-secure-32-character-key",
+    "ENCRYPTION_KEY": "cannabisos-encryption-key-2024-secure-32-character-aes-key",
+    "CASHFREE_CLIENT_ID": "your-production-cashfree-client-id",
+    "CASHFREE_CLIENT_SECRET": "your-production-cashfree-client-secret",
+    "CASHFREE_WEBHOOK_SECRET": "cannabisos-webhook-verification-secret-2024-secure-cashfree-webhook-key",
+    "CASHFREE_ENVIRONMENT": "production",
+    "NODE_ENV": "production",
+    "APP_URL": "https://cannabis-os.vercel.app",
+    "LOG_LEVEL": "info",
+    "ANALYTICS_ID": "your-google-analytics-id",
+    "RATE_LIMIT_WINDOW_MS": "900000",
+    "RATE_LIMIT_MAX_REQUESTS": "100",
+    "CORS_ORIGIN": "https://cannabis-os.vercel.app"
+  },
+  "git": {
+    "deploymentEnabled": true
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ]
+}
