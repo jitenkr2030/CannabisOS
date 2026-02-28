@@ -32,13 +32,28 @@ export async function POST(request: NextRequest) {
     // Get database instance
     const dbInstance = await db
     
-    // Check if any users exist in database
-    const userCount = await dbInstance.user.count()
+    // Try to check if users exist, but handle schema errors gracefully
+    let userCount = 0
+    try {
+      userCount = await dbInstance.user.count()
+    } catch (error) {
+      console.error('Database schema error:', error)
+      // If table doesn't exist, we need to create it
+      return NextResponse.json(
+        { 
+          error: 'Database schema not found',
+          message: 'Database tables need to be created. Please run database migration.',
+          needsMigration: true
+        },
+        { status: 503 }
+      )
+    }
+    
     if (userCount === 0) {
       return NextResponse.json(
         { 
           error: 'No users found in database',
-          message: 'Database needs to be seeded. Please contact administrator.',
+          message: 'Database needs to be seeded with demo users.',
           needsSeeding: true
         },
         { status: 404 }
@@ -105,8 +120,35 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Login error:', error)
+    
+    // Provide more specific error messages
+    if (error.message.includes('relation "user" does not exist')) {
+      return NextResponse.json(
+        { 
+          error: 'Database tables not created',
+          message: 'Database schema needs to be created. Please run database migration.',
+          needsMigration: true
+        },
+        { status: 503 }
+      )
+    }
+    
+    if (error.message.includes('Invalid prisma.user.count()')) {
+      return NextResponse.json(
+        { 
+          error: 'Database configuration error',
+          message: 'Prisma client configuration issue. Check DATABASE_URL.',
+          configError: true
+        },
+        { status: 500 }
+      )
+    }
+    
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     )
   }
