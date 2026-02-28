@@ -20,7 +20,13 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [isSeeding, setIsSeeding] = useState(false)
   const [seedMessage, setSeedMessage] = useState('')
-  const [dbStatus, setDbStatus] = useState<{ userCount: number; isSeeded: boolean } | null>(null)
+  const [dbStatus, setDbStatus] = useState<{
+    userCount: number;
+    isSeeded: boolean;
+    status?: string;
+    error?: string;
+    databaseUrl?: string;
+  } | null>(null)
 
   // Check database status on component mount
   useEffect(() => {
@@ -29,14 +35,32 @@ export default function LoginPage() {
 
   const checkDatabaseStatus = async () => {
     try {
-      const response = await fetch('/api/seed')
+      const response = await fetch('/api/init-db')
       const data = await response.json()
-      setDbStatus({
-        userCount: data.userCount || 0,
-        isSeeded: data.isSeeded || false
-      })
+      
+      if (response.ok) {
+        setDbStatus({
+          userCount: 0, // We'll check this separately
+          isSeeded: false,
+          status: data.status,
+          databaseUrl: data.databaseUrl
+        })
+      } else {
+        setDbStatus({
+          userCount: 0,
+          isSeeded: false,
+          status: 'Error',
+          error: data.error
+        })
+      }
     } catch (error) {
       console.error('Failed to check database status:', error)
+      setDbStatus({
+        userCount: 0,
+        isSeeded: false,
+        status: 'Error',
+        error: 'Connection failed'
+      })
     }
   }
 
@@ -121,14 +145,18 @@ export default function LoginPage() {
 
         {/* Database Status */}
         {dbStatus && (
-          <Card className="border-blue-200 bg-blue-50">
+          <Card className={dbStatus.status === 'Connected' ? "border-green-200 bg-green-50" : dbStatus.status === 'Error' ? "border-red-200 bg-red-50" : "border-blue-200 bg-blue-50"}>
             <CardContent className="pt-6">
               <div className="flex items-center space-x-2">
                 <Database className="h-4 w-4 text-blue-600" />
                 <span className="text-sm text-blue-800">
-                  Database: {dbStatus.isSeeded ? `✅ Seeded (${dbStatus.userCount} users)` : '⚠️ Empty - Needs seeding'}
+                  Database: {dbStatus.status === 'Connected' ? '✅ Connected' : dbStatus.status === 'Error' ? '❌ Error' : '⚠️ Checking...'}
+                  {dbStatus.databaseUrl && ` (${dbStatus.databaseUrl})`}
                 </span>
               </div>
+              {dbStatus.error && (
+                <p className="text-xs text-red-600 mt-2">Error: {dbStatus.error}</p>
+              )}
             </CardContent>
           </Card>
         )}
@@ -156,7 +184,7 @@ export default function LoginPage() {
             )}
 
             {/* Seed Database Button */}
-            {(!dbStatus?.isSeeded) && (
+            {dbStatus && (dbStatus.status === 'Connected' && !dbStatus.isSeeded) && (
               <div className="space-y-2">
                 <Button
                   onClick={seedDatabase}
@@ -178,6 +206,23 @@ export default function LoginPage() {
                 </Button>
                 <p className="text-xs text-gray-500 text-center">
                   Creates admin, manager, staff, and driver accounts (password: demo123)
+                </p>
+              </div>
+            )}
+
+            {/* Database Error */}
+            {dbStatus && dbStatus.status === 'Error' && (
+              <div className="space-y-2">
+                <Button
+                  onClick={checkDatabaseStatus}
+                  variant="outline"
+                  className="w-full border-red-300 text-red-700 hover:bg-red-50"
+                >
+                  <Database className="mr-2 h-4 w-4" />
+                  Retry Database Connection
+                </Button>
+                <p className="text-xs text-gray-500 text-center">
+                  Click to retry database connection
                 </p>
               </div>
             )}

@@ -6,10 +6,14 @@ const publicPaths = [
   '/',
   '/login',
   '/register',
+  '/landing',
+  '/consultants',
+  '/partners',
   '/api/auth/login',
   '/api/auth/register',
   '/api/auth/[...nextauth]',
   '/api/seed',
+  '/api/init-db',
   '/manifest.json',
   '/robots.txt',
   '/favicon.ico',
@@ -21,13 +25,13 @@ const publicPaths = [
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Allow public paths without authentication
+  // Allow all public paths without authentication
   if (publicPaths.some(path => pathname.startsWith(path))) {
     return NextResponse.next()
   }
 
   // Allow static assets with specific extensions
-  if (pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|css|js|woff|woff2|ttf|eot)$/)) {
+  if (pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|css|js|woff|woff2|ttf|eot|json|xml|txt)$/)) {
     return NextResponse.next()
   }
 
@@ -48,7 +52,6 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
      */
     '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
