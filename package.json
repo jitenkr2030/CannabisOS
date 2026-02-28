@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
     "build": "rm -rf .next && bun run db:generate && next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
-    "postinstall": "echo 'Postinstall completed - All issues resolved'",
+    "postinstall": "prisma generate && echo 'Postinstall completed - Prisma client generated'",
     "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
     "lint": "eslint .",
     "test": "jest",

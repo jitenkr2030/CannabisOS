@@ -129,7 +129,7 @@ const createPrismaFreeMockDb = () => {
 let runtimePrismaClient: any = null;
 
 // Lazy load Prisma only at runtime
-const getRuntimePrismaClient = () => {
+const getRuntimePrismaClient = async () => {
   if (isBuildTime) {
     return null;
   }
@@ -137,22 +137,19 @@ const getRuntimePrismaClient = () => {
   if (!runtimePrismaClient) {
     try {
       // Dynamic import to avoid loading Prisma during build
-      return import('@prisma/client').then(({ PrismaClient }) => {
-        runtimePrismaClient = new PrismaClient({
-          datasources: {
-            db: {
-              url: process.env.DATABASE_URL,
-            },
+      const { PrismaClient } = await import('@prisma/client');
+      
+      runtimePrismaClient = new PrismaClient({
+        datasources: {
+          db: {
+            url: process.env.DATABASE_URL,
           },
-          log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-        });
-        return runtimePrismaClient;
-      }).catch((error) => {
-        console.error('Failed to load Prisma client:', error);
-        return createPrismaFreeMockDb();
+        },
+        log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
       });
+      return runtimePrismaClient;
     } catch (error) {
-      console.error('Failed to import Prisma client:', error);
+      console.error('Failed to load Prisma client:', error);
       return createPrismaFreeMockDb();
     }
   }
