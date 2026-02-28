@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Eye, EyeOff, Mail, Lock, Leaf, Database } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, Leaf, User } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -18,80 +18,6 @@ export default function LoginPage() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [isSeeding, setIsSeeding] = useState(false)
-  const [seedMessage, setSeedMessage] = useState('')
-  const [dbStatus, setDbStatus] = useState<{
-    userCount: number;
-    isSeeded: boolean;
-    status?: string;
-    error?: string;
-    databaseUrl?: string;
-  } | null>(null)
-
-  // Check database status on component mount
-  useEffect(() => {
-    checkDatabaseStatus()
-  }, [])
-
-  const checkDatabaseStatus = async () => {
-    try {
-      const response = await fetch('/api/init-db')
-      const data = await response.json()
-      
-      if (response.ok) {
-        setDbStatus({
-          userCount: 0, // We'll check this separately
-          isSeeded: false,
-          status: data.status,
-          databaseUrl: data.databaseUrl
-        })
-      } else {
-        setDbStatus({
-          userCount: 0,
-          isSeeded: false,
-          status: 'Error',
-          error: data.error
-        })
-      }
-    } catch (error) {
-      console.error('Failed to check database status:', error)
-      setDbStatus({
-        userCount: 0,
-        isSeeded: false,
-        status: 'Error',
-        error: 'Connection failed'
-      })
-    }
-  }
-
-  const seedDatabase = async () => {
-    setIsSeeding(true)
-    setSeedMessage('')
-    setError('')
-
-    try {
-      const response = await fetch('/api/seed', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setSeedMessage('✅ Database seeded successfully! You can now login.')
-        // Refresh database status
-        await checkDatabaseStatus()
-      } else {
-        setSeedMessage(`❌ ${data.error}`)
-      }
-    } catch (error) {
-      setSeedMessage('❌ Failed to seed database. Please try again.')
-    } finally {
-      setIsSeeding(false)
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -117,17 +43,22 @@ export default function LoginPage() {
         // Redirect to dashboard
         router.push('/dashboard')
       } else {
-        if (data.needsSeeding) {
-          setError('🌱 Database needs to be seeded. Click the "Seed Database" button below.')
-        } else {
-          setError(data.error || 'Login failed')
-        }
+        setError(data.error || 'Login failed')
       }
     } catch (err) {
       setError('Connection error. Please try again.')
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const quickLogin = (email: string, password: string) => {
+    setFormData({ email, password })
+    // Auto-submit after a short delay
+    setTimeout(() => {
+      const form = document.getElementById('login-form') as HTMLFormElement
+      if (form) form.requestSubmit()
+    }, 100)
   }
 
   return (
@@ -143,24 +74,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Database Status */}
-        {dbStatus && (
-          <Card className={dbStatus.status === 'Connected' ? "border-green-200 bg-green-50" : dbStatus.status === 'Error' ? "border-red-200 bg-red-50" : "border-blue-200 bg-blue-50"}>
-            <CardContent className="pt-6">
-              <div className="flex items-center space-x-2">
-                <Database className="h-4 w-4 text-blue-600" />
-                <span className="text-sm text-blue-800">
-                  Database: {dbStatus.status === 'Connected' ? '✅ Connected' : dbStatus.status === 'Error' ? '❌ Error' : '⚠️ Checking...'}
-                  {dbStatus.databaseUrl && ` (${dbStatus.databaseUrl})`}
-                </span>
-              </div>
-              {dbStatus.error && (
-                <p className="text-xs text-red-600 mt-2">Error: {dbStatus.error}</p>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
         <Card className="shadow-lg">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Welcome Back</CardTitle>
@@ -175,65 +88,48 @@ export default function LoginPage() {
               </Alert>
             )}
             
-            {seedMessage && (
-              <Alert className={seedMessage.includes('✅') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
-                <AlertDescription className={seedMessage.includes('✅') ? 'text-green-800' : 'text-red-800'}>
-                  {seedMessage}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Seed Database Button */}
-            {dbStatus && (dbStatus.status === 'Connected' && !dbStatus.isSeeded) && (
+            {/* Demo Credentials */}
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                <User className="h-4 w-4 mr-2" />
+                Demo Credentials (Click to Auto-Fill)
+              </h3>
               <div className="space-y-2">
-                <Button
-                  onClick={seedDatabase}
-                  disabled={isSeeding}
-                  variant="outline"
-                  className="w-full border-orange-300 text-orange-700 hover:bg-orange-50"
+                <button
+                  onClick={() => quickLogin('admin@cannabisos.com', 'demo123')}
+                  className="w-full text-left p-2 text-sm bg-white border rounded hover:bg-gray-100 transition-colors"
                 >
-                  {isSeeding ? (
-                    <>
-                      <Database className="mr-2 h-4 w-4 animate-spin" />
-                      Seeding Database...
-                    </>
-                  ) : (
-                    <>
-                      <Database className="mr-2 h-4 w-4" />
-                      Seed Database with Demo Users
-                    </>
-                  )}
-                </Button>
-                <p className="text-xs text-gray-500 text-center">
-                  Creates admin, manager, staff, and driver accounts (password: demo123)
-                </p>
-              </div>
-            )}
-
-            {/* Database Error */}
-            {dbStatus && dbStatus.status === 'Error' && (
-              <div className="space-y-2">
-                <Button
-                  onClick={checkDatabaseStatus}
-                  variant="outline"
-                  className="w-full border-red-300 text-red-700 hover:bg-red-50"
+                  <span className="font-medium text-green-600">👤 Admin:</span> admin@cannabisos.com / demo123
+                </button>
+                <button
+                  onClick={() => quickLogin('manager@cannabisos.com', 'demo123')}
+                  className="w-full text-left p-2 text-sm bg-white border rounded hover:bg-gray-100 transition-colors"
                 >
-                  <Database className="mr-2 h-4 w-4" />
-                  Retry Database Connection
-                </Button>
-                <p className="text-xs text-gray-500 text-center">
-                  Click to retry database connection
-                </p>
+                  <span className="font-medium text-blue-600">👤 Manager:</span> manager@cannabisos.com / demo123
+                </button>
+                <button
+                  onClick={() => quickLogin('staff@cannabisos.com', 'demo123')}
+                  className="w-full text-left p-2 text-sm bg-white border rounded hover:bg-gray-100 transition-colors"
+                >
+                  <span className="font-medium text-purple-600">👤 Staff:</span> staff@cannabisos.com / demo123
+                </button>
+                <button
+                  onClick={() => quickLogin('driver@cannabisos.com', 'demo123')}
+                  className="w-full text-left p-2 text-sm bg-white border rounded hover:bg-gray-100 transition-colors"
+                >
+                  <span className="font-medium text-orange-600">👤 Driver:</span> driver@cannabisos.com / demo123
+                </button>
               </div>
-            )}
+            </div>
             
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form id="login-form" onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="email">Email address</Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -248,6 +144,7 @@ export default function LoginPage() {
                   id="password"
                   name="password"
                   type="password"
+                  autoComplete="current-password"
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
@@ -259,24 +156,11 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full bg-green-600 hover:bg-green-700"
-                disabled={isLoading || !dbStatus?.isSeeded}
+                disabled={isLoading}
               >
                 {isLoading ? 'Signing in...' : 'Sign in'}
               </Button>
             </form>
-
-            {/* Demo Credentials */}
-            {dbStatus?.isSeeded && (
-              <div className="border-t pt-4">
-                <p className="text-xs text-gray-500 text-center mb-2">Demo Credentials:</p>
-                <div className="text-xs text-gray-600 space-y-1">
-                  <div>👤 Admin: admin@cannabisos.com / demo123</div>
-                  <div>👤 Manager: manager@cannabisos.com / demo123</div>
-                  <div>👤 Staff: staff@cannabisos.com / demo123</div>
-                  <div>👤 Driver: driver@cannabisos.com / demo123</div>
-                </div>
-              </div>
-            )}
 
             <div className="text-center">
               <p className="text-sm text-gray-600">
