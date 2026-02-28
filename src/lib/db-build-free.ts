@@ -1,16 +1,15 @@
 // Completely Prisma-free database module for build time
 // This module completely avoids any Prisma imports during build
 
-// Build-time detection with multiple methods
+// Build-time detection with accurate detection methods
 const isBuildTime = 
   process.env.NEXT_PHASE === 'phase-production-build' || 
   process.env.NEXT_PHASE === 'phase-development-build' ||
-  process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === undefined ||
-  process.env.BUILD_ID !== undefined || // Vercel build ID
-  process.env.VERCEL_ENV !== undefined || // Vercel environment
+  process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === undefined && !process.env.VERCEL_URL ||
   process.env.CI === 'true' || // CI environment
   process.env.BUILD_TIME === 'true' ||
-  process.env.NEXT_BUILD_ID !== undefined // Next.js build ID
+  process.argv.includes('build') || // Next.js build command
+  (typeof window === 'undefined' && process.env.NEXT_RUNTIME === 'edge') // Edge runtime build
 
 // Create a completely Prisma-free mock database
 const createPrismaFreeMockDb = () => {
