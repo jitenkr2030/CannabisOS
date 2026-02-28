@@ -1,4 +1,4 @@
-// Real database connection - no fallbacks
+// Real database connection using Prisma 7.x config
 import { PrismaClient } from '@prisma/client'
 
 // Check if we're in build time (only during actual build, not production)
@@ -8,7 +8,7 @@ const isBuildTime =
   process.env.BUILD_TIME === 'true' ||
   process.argv.includes('build');
 
-// Create real Prisma client
+// Create real Prisma client with proper configuration
 const createPrismaClient = () => {
   if (isBuildTime) {
     throw new Error('Database operations not allowed during build time');
