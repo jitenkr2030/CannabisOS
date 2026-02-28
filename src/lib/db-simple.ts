@@ -1,4 +1,4 @@
-// Simple database connection for Prisma 6.x
+// Simple database connection for Prisma 6.x - CORRECTED
 import { PrismaClient } from '@prisma/client'
 
 // Global variable to prevent multiple instances
@@ -6,13 +6,8 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// Create Prisma client
+// Create Prisma client - PRISMA 6.x WAY (reads from schema.prisma)
 export const db = globalForPrisma.prisma ?? new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
 })
 
