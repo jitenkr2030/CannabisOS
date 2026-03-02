@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🌱 Starting database seeding...')
     
+<<<<<<< HEAD
     // Use Prisma directly to avoid configuration issues
     const { PrismaClient } = await import('@prisma/client')
     const prisma = new PrismaClient({
@@ -106,6 +107,111 @@ export async function POST(request: NextRequest) {
     if (existingUsers > 0) {
       console.log(`✅ Database already seeded with ${existingUsers} users`)
       await prisma.$disconnect()
+=======
+    // First, ensure database schema exists
+    try {
+      const { PrismaClient } = await import('@prisma/client')
+      const prisma = new PrismaClient({
+        log: ['error'],
+      })
+      
+      await prisma.$connect()
+      console.log('✅ Database connected')
+      
+      // Test if User table exists
+      try {
+        await prisma.user.count()
+        console.log('✅ User table already exists')
+      } catch (error) {
+        console.log('⚠️ User table does not exist, creating schema...')
+        
+        // Create User table manually
+        await prisma.$executeRaw`
+          CREATE TABLE IF NOT EXISTS "User" (
+            id TEXT PRIMARY KEY,
+            email TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL,
+            storeId TEXT NOT NULL,
+            phone TEXT,
+            isActive BOOLEAN DEFAULT true,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            lastLoginAt TIMESTAMP
+          );
+        `
+        console.log('✅ Created User table')
+        
+        // Create Store table
+        await prisma.$executeRaw`
+          CREATE TABLE IF NOT EXISTS "Store" (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            address TEXT NOT NULL,
+            phone TEXT,
+            email TEXT,
+            licenseNumber TEXT,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `
+        console.log('✅ Created Store table')
+        
+        // Create Product table
+        await prisma.$executeRaw`
+          CREATE TABLE IF NOT EXISTS "Product" (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            description TEXT,
+            sku TEXT NOT NULL,
+            category TEXT NOT NULL,
+            thcContent DECIMAL(5,2),
+            cbdContent DECIMAL(5,2),
+            weight DECIMAL(10,2),
+            unit TEXT NOT NULL,
+            price DECIMAL(10,2),
+            cost DECIMAL(10,2),
+            tags TEXT,
+            storeId TEXT NOT NULL,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `
+        console.log('✅ Created Product table')
+        
+        // Create Inventory table
+        await prisma.$executeRaw`
+          CREATE TABLE IF NOT EXISTS "Inventory" (
+            id TEXT PRIMARY KEY,
+            productId TEXT NOT NULL,
+            storeId TEXT NOT NULL,
+            quantity INTEGER NOT NULL DEFAULT 0,
+            reserved INTEGER NOT NULL DEFAULT 0,
+            available INTEGER NOT NULL DEFAULT 0,
+            reorderLevel INTEGER NOT NULL DEFAULT 10,
+            maxStock INTEGER NOT NULL DEFAULT 100,
+            location TEXT,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `
+        console.log('✅ Created Inventory table')
+      }
+      
+      await prisma.$disconnect()
+    } catch (error) {
+      console.error('❌ Schema creation failed:', error)
+    }
+    
+    // Now proceed with seeding
+    const dbInstance = await db
+
+    // Check if users already exist
+    const existingUsers = await dbInstance.user.count().catch(() => 0)
+    if (existingUsers > 0) {
+      console.log(`✅ Database already seeded with ${existingUsers} users`)
+>>>>>>> b4ad559bc65b70aae98015f10a87a16c1156502a
       return NextResponse.json(
         { message: 'Database already seeded', userCount: existingUsers },
         { status: 200 }
@@ -116,7 +222,11 @@ export async function POST(request: NextRequest) {
     // Create a demo store first
     let store;
     try {
+<<<<<<< HEAD
       store = await prisma.store.create({
+=======
+      store = await dbInstance.store.create({
+>>>>>>> b4ad559bc65b70aae98015f10a87a16c1156502a
         data: {
           id: 'demo-store',
           name: 'Toronto Main Dispensary',
@@ -131,9 +241,14 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       console.error('❌ Failed to create store:', error)
       // Try to find existing store
+<<<<<<< HEAD
       store = await prisma.store.findUnique({ where: { id: 'demo-store' } })
       if (!store) {
         await prisma.$disconnect()
+=======
+      store = await dbInstance.store.findUnique({ where: { id: 'demo-store' } })
+      if (!store) {
+>>>>>>> b4ad559bc65b70aae98015f10a87a16c1156502a
         return NextResponse.json(
           { error: 'Failed to create store', details: error.message },
           { status: 500 }
@@ -177,7 +292,11 @@ export async function POST(request: NextRequest) {
 
     for (const userConfig of userConfigs) {
       try {
+<<<<<<< HEAD
         const user = await prisma.user.create({
+=======
+        const user = await dbInstance.user.create({
+>>>>>>> b4ad559bc65b70aae98015f10a87a16c1156502a
           data: {
             ...userConfig,
             password: hashedPassword,
@@ -193,7 +312,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (users.length === 0) {
+<<<<<<< HEAD
       await prisma.$disconnect()
+=======
+>>>>>>> b4ad559bc65b70aae98015f10a87a16c1156502a
       return NextResponse.json(
         { error: 'Failed to create any users' },
         { status: 500 }
@@ -236,14 +358,22 @@ export async function POST(request: NextRequest) {
 
     for (const productConfig of productConfigs) {
       try {
+<<<<<<< HEAD
         const product = await prisma.product.create({
+=======
+        const product = await dbInstance.product.create({
+>>>>>>> b4ad559bc65b70aae98015f10a87a16c1156502a
           data: productConfig
         })
         products.push(product)
         console.log(`✅ Created product: ${product.name}`)
 
         // Create inventory for each product
+<<<<<<< HEAD
         await prisma.inventory.create({
+=======
+        await dbInstance.inventory.create({
+>>>>>>> b4ad559bc65b70aae98015f10a87a16c1156502a
           data: {
             productId: product.id,
             storeId: store.id,
@@ -262,7 +392,10 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🎉 Database seeding completed successfully!')
+<<<<<<< HEAD
     await prisma.$disconnect()
+=======
+>>>>>>> b4ad559bc65b70aae98015f10a87a16c1156502a
 
     return NextResponse.json({
       message: 'Database schema created and seeded successfully',
@@ -287,6 +420,11 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     )
+<<<<<<< HEAD
+=======
+  } finally {
+    await db.$disconnect()
+>>>>>>> b4ad559bc65b70aae98015f10a87a16c1156502a
   }
 }
 
