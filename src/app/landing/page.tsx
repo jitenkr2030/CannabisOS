@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import CannabiLogo from '@/components/CannabiLogo'
 import { 
   Search, 
   Menu, 
@@ -209,8 +210,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Leaf className="h-8 w-8 text-green-600 mr-3" />
-              <span className="text-xl font-bold text-gray-900">CannabisOS</span>
+              <CannabiLogo size="md" />
             </div>
             
             <div className="hidden md:flex items-center space-x-8">
@@ -257,10 +257,10 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Complete Dispensary Management Made Simple
+              Complete Cannabis Dispensery Management Made Simple
             </h1>
             <p className="text-xl md:text-2xl text-green-100 max-w-3xl mx-auto mb-8">
-              CannabisOS is the all-in-one platform for modern dispensaries. Manage sales, inventory, compliance, and deliveries from one powerful system.
+              Cannabi is the all-in-one platform for modern cannabis dispensaries. Manage sales, inventory, compliance, and deliveries from one powerful system.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/login">
@@ -281,10 +281,10 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Everything You Need to Run Your Dispensary
+              Everything You Need to Run Your Cannabis Dispensery
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              From seed to sale, CannabisOS provides all the tools you need to operate a compliant and profitable cannabis business.
+              From seed to sale, Cannabi provides all the tools you need to operate a compliant and profitable cannabis business.
             </p>
           </div>
 
@@ -350,7 +350,7 @@ export default function LandingPage() {
               For Cannabis Compliance Consultants
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Manage multiple clients with our white-label consultant portal. Present CannabisOS as your own platform while leveraging our powerful features.
+              Manage multiple clients with our white-label consultant portal. Present Cannabi as your own platform while leveraging our powerful features.
             </p>
           </div>
 
@@ -525,7 +525,7 @@ export default function LandingPage() {
             Ready to Transform Your Dispensary?
           </h2>
           <p className="text-xl text-green-100 mb-8 max-w-3xl mx-auto">
-            Join hundreds of dispensaries using CannabisOS to streamline operations, ensure compliance, and grow their business.
+            Join hundreds of cannabis dispensaries using Cannabi to streamline operations, ensure compliance, and grow their business.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button className="bg-white text-green-600 px-8 py-3 rounded-md text-lg font-semibold hover:bg-gray-100">
@@ -544,11 +544,10 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
             <div className="col-span-2">
               <div className="flex items-center mb-4">
-                <Leaf className="h-8 w-8 text-green-600 mr-3" />
-                <span className="text-xl font-bold">CannabisOS</span>
+                <CannabiLogo size="md" />
               </div>
               <p className="text-gray-400 mb-4">
-                The complete dispensery management system for modern cannabis businesses.
+                The complete cannabis dispensery management system for modern cannabis businesses.
               </p>
               <div className="flex space-x-4">
                 <div className="text-2xl font-bold text-green-600">50M+</div>
@@ -603,7 +602,7 @@ export default function LandingPage() {
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 CannabisOS. All rights reserved.</p>
+            <p>&copy; 2024 Cannabi. All rights reserved.</p>
           </div>
         </div>
       </footer>

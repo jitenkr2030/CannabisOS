@@ -14,38 +14,38 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CannabisOS - Dispensary Management System",
-  description: "Comprehensive dispensary management system with POS, inventory, AI accounting, and compliance tracking for cannabis retailers.",
-  keywords: ["cannabis", "dispensary", "POS", "inventory", "compliance", "accounting", "delivery", "QR authentication"],
-  authors: [{ name: "CannabisOS Team" }],
+  title: "Cannabi - Cannabis Dispensery Management System",
+  description: "Comprehensive cannabis dispensery management system with POS, inventory, AI accounting, and compliance tracking for cannabis retailers.",
+  keywords: ["cannabi", "cannabis", "dispensary", "POS", "inventory", "compliance", "accounting", "delivery", "QR authentication"],
+  authors: [{ name: "Cannabi Team" }],
   icons: {
     icon: "/icons/icon-192x192.png",
     apple: "/icons/icon-192x192.png",
   },
   manifest: "/manifest.json",
-  metadataBase: new URL('https://cannabis-os.vercel.app'),
+  metadataBase: new URL('https://cannabi.vercel.app'),
   alternates: {
-    canonical: 'https://cannabis-os.vercel.app'
+    canonical: 'https://cannabi.vercel.app'
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "CannabisOS",
+    title: "Cannabi",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
-    title: "CannabisOS - Dispensary Management System",
-    description: "Complete dispensary management with POS, inventory, AI accounting, and compliance tracking",
+    title: "Cannabi - Cannabis Dispensery Management System",
+    description: "Complete cannabis dispensery management with POS, inventory, AI accounting, and compliance tracking",
     type: "website",
-    url: 'https://cannabis-os.vercel.app',
-    siteName: 'CannabisOS',
+    url: 'https://cannabi.vercel.app',
+    siteName: 'Cannabi',
   },
   twitter: {
     card: "summary_large_image",
-    title: "CannabisOS - Dispensary Management System",
-    description: "Complete dispensary management with POS, inventory, AI accounting, and compliance tracking",
+    title: "Cannabi - Cannabis Dispensery Management System",
+    description: "Complete cannabis dispensery management with POS, inventory, AI accounting, and compliance tracking",
   },
 };
 
@@ -61,11 +61,11 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="CannabisOS" />
-        <meta name="application-name" content="CannabisOS" />
+        <meta name="apple-mobile-web-app-title" content="Cannabi" />
+        <meta name="application-name" content="Cannabi" />
         <meta name="msapplication-TileColor" content="#16a34a" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
-        <link rel="canonical" href="https://cannabis-os.vercel.app" />
+        <link rel="canonical" href="https://cannabi.vercel.app" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}

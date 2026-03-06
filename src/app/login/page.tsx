@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Eye, EyeOff, Mail, Lock, Leaf, User, CheckCircle } from 'lucide-react'
+import CannabiLogo from '@/components/CannabiLogo'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -22,7 +23,7 @@ export default function LoginPage() {
   // Auto-fill demo credentials on mount
   useEffect(() => {
     setFormData({
-      email: 'admin@cannabisos.com',
+      email: 'admin@cannabi.com',
       password: 'demo123'
     })
   }, [])
@@ -74,11 +75,11 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex justify-center items-center mb-6">
-            <Leaf className="h-12 w-12 text-green-600" />
+            <CannabiLogo size="lg" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">Sign in to CannabisOS</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Sign in to Cannabi</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Access your dispensery management dashboard
+            Access your cannabis dispensery management dashboard
           </p>
           <div className="mt-4 p-3 bg-green-100 rounded-lg">
             <p className="text-sm text-green-800 font-medium">
@@ -112,28 +113,28 @@ export default function LoginPage() {
               </h3>
               <div className="space-y-2">
                 <button
-                  onClick={() => quickLogin('admin@cannabisos.com', 'demo123')}
+                  onClick={() => quickLogin('admin@cannabi.com', 'demo123')}
                   className="w-full text-left p-2 text-sm bg-white border rounded hover:bg-green-100 transition-colors"
                 >
-                  <span className="font-medium text-green-600">👤 Admin:</span> admin@cannabisos.com / demo123
+                  <span className="font-medium text-green-600">👤 Admin:</span> admin@cannabi.com / demo123
                 </button>
                 <button
-                  onClick={() => quickLogin('manager@cannabisos.com', 'demo123')}
+                  onClick={() => quickLogin('manager@cannabi.com', 'demo123')}
                   className="w-full text-left p-2 text-sm bg-white border rounded hover:bg-green-100 transition-colors"
                 >
-                  <span className="font-medium text-blue-600">👤 Manager:</span> manager@cannabisos.com / demo123
+                  <span className="font-medium text-blue-600">👤 Manager:</span> manager@cannabi.com / demo123
                 </button>
                 <button
-                  onClick={() => quickLogin('staff@cannabisos.com', 'demo123')}
+                  onClick={() => quickLogin('staff@cannabi.com', 'demo123')}
                   className="w-full text-left p-2 text-sm bg-white border rounded hover:bg-green-100 transition-colors"
                 >
-                  <span className="font-medium text-purple-600">👤 Staff:</span> staff@cannabisos.com / demo123
+                  <span className="font-medium text-purple-600">👤 Staff:</span> staff@cannabi.com / demo123
                 </button>
                 <button
-                  onClick={() => quickLogin('driver@cannabisos.com', 'demo123')}
+                  onClick={() => quickLogin('driver@cannabi.com', 'demo123')}
                   className="w-full text-left p-2 text-sm bg-white border rounded hover:bg-green-100 transition-colors"
                 >
-                  <span className="font-medium text-orange-600">👤 Driver:</span> driver@cannabisos.com / demo123
+                  <span className="font-medium text-orange-600">👤 Driver:</span> driver@cannabi.com / demo123
                 </button>
               </div>
               <p className="text-xs text-green-600 mt-2 text-center">

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Settings, LogOut } from 'lucide-react'
+import CannabiLogo from './CannabiLogo'
 
 interface PageTemplateProps {
   title: string
@@ -47,7 +48,8 @@ export default function PageTemplate({ title, description, children, pageType }:
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-4 mb-2">
+            <CannabiLogo size="sm" variant="text" />
             <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
             <Badge className={getRoleColor()}>
               {getRoleLabel()}

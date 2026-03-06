@@ -1,6 +1,7 @@
 {
-  "name": "nextjs_tailwind_shadcn_ts",
-  "version": "0.2.0",
+  "name": "cannabi",
+  "version": "1.0.0",
+  "description": "Cannabi - Comprehensive Cannabis Dispensery Management System",
   "private": true,
   "scripts": {
     "dev": "NODE_OPTIONS='--max-old-space-size=4096' NODE_NO_TURBO=1 next dev -p 3000 2>&1 | tee dev.log",

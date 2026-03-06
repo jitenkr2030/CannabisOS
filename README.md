@@ -1,6 +1,6 @@
-# 🌿 CannabisOS - Complete Dispensary Management System
+# 🌿 Cannabi - Complete Cannabis Dispensery Management System
 
-A comprehensive, production-ready dispensary management platform built with Next.js 16, TypeScript, and modern web technologies. CannabisOS streamlines operations for cannabis retailers with POS, inventory, AI accounting, and compliance tracking.
+A comprehensive, production-ready cannabis dispensery management platform built with Next.js 16, TypeScript, and modern web technologies. Cannabi streamlines operations for cannabis retailers with POS, inventory, AI accounting, and compliance tracking.
 
 ## 🚀 Features
 
@@ -118,10 +118,10 @@ bun run dev
 
 ### **4. Access Application**
 - 🌐 **URL**: `http://localhost:3000`
-- 👤 **Demo Admin**: `admin@cannabisos.com` / `demo123`
-- 👤 **Demo Manager**: `manager@cannabisos.com` / `demo123`
-- 👤 **Demo Staff**: `staff@cannabisos.com` / `demo123`
-- 👤 **Demo Driver**: `driver@cannabisos.com` / `demo123`
+- 👤 **Demo Admin**: `admin@cannabi.com` / `demo123`
+- 👤 **Demo Manager**: `manager@cannabi.com` / `demo123`
+- 👤 **Demo Staff**: `staff@cannabi.com` / `demo123`
+- 👤 **Demo Driver**: `driver@cannabi.com` / `demo123`
 
 ## 🏗 Architecture Overview
 
@@ -368,7 +368,7 @@ src/
 - 📖 **API Documentation** - `/api-docs`
 - 🎥 **Video Tutorials** - Coming soon
 - ❓ **FAQ** - Common questions
-- 📧 **Support** - support@cannabisos.com
+- 📧 **Support** - support@cannabi.com
 
 ### **Troubleshooting**
 - 🔧 **Common Issues** - Check wiki
@@ -401,10 +401,10 @@ bun run db:seed
 bun run dev
 
 # Visit http://localhost:3000
-# Login with: admin@cannabisos.com / demo123
+# Login with: admin@cannabi.com / demo123
 ```
 
-**CannabisOS** - The complete solution for modern dispensary management. 🌿
+**Cannabi** - The complete solution for modern cannabis dispensery management. 🌿
 
 ---
 
