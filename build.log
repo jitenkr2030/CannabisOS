@@ -1,0 +1,44 @@
+
+> nextjs_tailwind_shadcn_ts@0.2.0 build
+> rm -rf .next && npx prisma generate && next build --turbo
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 448ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.production, .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./src/app/globals.css
+Error evaluating Node.js code
+Error: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+    [at at (/home/z/my-project/node_modules/tailwindcss/dist/lib.js:38:1643)]
+    at turbopack:///[turbopack-node]/transforms/postcss.ts:56:14 [/home/z/my-project/.next/build/chunks/[root-of-the-server]__6d51cb5d._.js:165:20]
+    [at <anonymous>]
+    at Module.init (turbopack:///[turbopack-node]/transforms/postcss.ts:43:33) [/home/z/my-project/.next/build/chunks/[root-of-the-server]__6d51cb5d._.js:155:35]
+    at run (turbopack:///[turbopack-node]/ipc/evaluate.ts:77:20) [/home/z/my-project/.next/build/chunks/[root-of-the-server]__44695d76._.js:429:26]
+    [at process.processTicksAndRejections (node:internal/process/task_queues:103:5)]
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component]
+
+
+    at Module.init (turbopack:///[turbopack-node]/transforms/postcss.ts:43:33) [/home/z/my-project/.next/build/chunks/[root-of-the-server]__6d51cb5d._.js:155:35])
+    at run (turbopack:///[turbopack-node]/ipc/evaluate.ts:77:20) [/home/z/my-project/.next/build/chunks/[root-of-the-server]__44695d76._.js:429:26])

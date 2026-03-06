@@ -1,0 +1,310 @@
+// CannabisOS - Simple Database Schema for Neon
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User management with roles
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String?
+  password    String
+  role        String    @default("STAFF")
+  phone       String?
+  avatar      String?
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("users")
+}
+
+// Store management for multi-store support
+model Store {
+  id            String   @id @default(cuid())
+  name          String
+  address       String
+  phone         String?
+  email         String?
+  licenseNumber String?
+  isActive      Boolean  @default(true)
+  timezone      String   @default("America/Toronto")
+  currency      String   @default("CAD")
+  storeId       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("stores")
+}
+
+// Product catalog with THC/CBD tracking
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  sku         String   @unique
+  barcode     String?
+  category    String   @default("FLOWER")
+  thcContent  Float?   // THC percentage
+  cbdContent  Float?   // CBD percentage
+  weight      Float?   // Weight in grams
+  unit        String   @default("g") // g, mg, ml, units
+  price       Float
+  cost        Float?
+  isActive    Boolean  @default(true)
+  requiresAge Boolean  @default(true)
+  minAge      Int      @default(19)
+  imageUrl    String?
+  tags        String? // JSON string for search and filtering
+  storeId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("products")
+}
+
+// Inventory management with batch tracking
+model Inventory {
+  id           String    @id @default(cuid())
+  quantity     Float     @default(0)
+  reserved     Float     @default(0) // Reserved for orders
+  available    Float // Computed: quantity - reserved
+  reorderLevel Float     @default(0)
+  maxStock     Float?
+  location     String? // Storage location
+  lastCounted  DateTime?
+  storeId      String?
+  productId    String?
+  batchId      String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("inventory")
+}
+
+// Batch tracking for compliance
+model Batch {
+  id              String    @id @default(cuid())
+  batchNumber     String    @unique
+  supplier        String
+  supplierLicense String?
+  receivedDate    DateTime
+  expiryDate      DateTime?
+  testDate        DateTime?
+  labResults      Json? // Lab test results
+  coaUrl          String? // Certificate of Analysis
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  storeId   String
+
+  @@map("batches")
+}
+
+model BatchProduct {
+  id        String   @id @default(cuid())
+  quantity  Float
+  createdAt DateTime @default(now())
+
+  batchId   String
+  productId String
+
+  @@unique([batchId, productId])
+  @@map("batch_products")
+}
+
+// Stock movement tracking
+model StockMovement {
+  id        String       @id @default(cuid())
+  type      String       @default("SALE")
+  quantity  Float
+  reason    String?
+  reference String? // Sale ID, Transfer ID, etc.
+  createdAt DateTime     @default(now())
+
+  inventoryId String
+  userId      String
+
+  @@map("stock_movements")
+}
+
+// POS and Sales
+model Sale {
+  id            String        @id @default(cuid())
+  receiptNumber String        @unique
+  customerName  String?
+  customerPhone String?
+  customerEmail String?
+  subtotal      Float
+  tax           Float         @default(0)
+  discount      Float         @default(0)
+  total         Float
+  paymentMethod String         @default("CASH")
+  paymentStatus String         @default("PAID")
+  status        String         @default("COMPLETED")
+  notes         String?
+  ageVerified   Boolean       @default(false)
+  verifiedBy    String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  storeId  String
+  userId   String
+
+  @@map("sales")
+}
+
+model SaleItem {
+  id        String   @id @default(cuid())
+  quantity  Float
+  unitPrice Float
+  discount  Float    @default(0)
+  total     Float
+  createdAt DateTime @default(now())
+
+  saleId    String
+  productId String
+
+  @@map("sale_items")
+}
+
+// AI Accounting System
+model Expense {
+  id                String          @id @default(cuid())
+  description       String
+  amount            Float
+  category          String          @default("OTHER")
+  date              DateTime
+  receiptUrl        String?
+  isRecurring       Boolean         @default(false)
+  recurringInterval String?
+  nextDueDate       DateTime?
+  notes             String?
+  voiceNote         String? // Transcribed voice input
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  storeId String
+  userId  String
+
+  @@map("expenses")
+}
+
+// QR Code Authentication
+model QRCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  productId String?
+  batchId   String?
+  isActive  Boolean  @default(true)
+  scanCount Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("qr_codes")
+}
+
+// Delivery Management
+model Delivery {
+  id              String         @id @default(cuid())
+  orderNumber     String         @unique
+  customerName    String
+  customerPhone   String
+  customerAddress String
+  customerEmail   String?
+  notes           String?
+  status          String         @default("PENDING")
+  estimatedTime   DateTime?
+  actualTime      DateTime?
+  distance        Float? // in km
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  storeId  String
+  driverId String?
+
+  @@map("deliveries")
+}
+
+model DeliveryItem {
+  id        String   @id @default(cuid())
+  quantity  Float
+  notes     String?
+  createdAt DateTime @default(now())
+
+  deliveryId  String
+  productName String
+  thcContent  Float?
+  cbdContent  Float?
+
+  @@map("delivery_items")
+}
+
+// Compliance and Audit
+model ComplianceReport {
+  id          String       @id @default(cuid())
+  type        String       @default("DAILY_SALES")
+  period      String // e.g., "2024-01", "Q1-2024"
+  data        Json // Report data
+  status      String       @default("PENDING")
+  submittedAt DateTime?
+  submittedBy String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("compliance_reports")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String // table name
+  entityId  String
+  oldValues Json?
+  newValues Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  userId String
+
+  @@map("audit_logs")
+}
+
+// Settings and Configuration
+model Setting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("settings")
+}
+
+// Notification System
+model Notification {
+  id          String   @id @default(cuid())
+  title       String
+  message     String
+  type        String   @default("INFO") // INFO, SUCCESS, WARNING, ERROR, ALERT
+  priority    String   @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  isRead      Boolean  @default(false)
+  actionUrl   String?  // URL to navigate when clicked
+  metadata    Json?    // Additional data
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId      String
+
+  @@map("notifications")
+}

@@ -1,0 +1,16 @@
+.next
+node_modules
+.env
+.env.local
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev-output.log
+server.log
+scripts/
+.git/
+README.md
+.github/
+prisma/migrations/
